@@ -43,10 +43,11 @@ import org.apache.hadoop.metrics2.sink.timeline.TimelineMetrics;
 import org.apache.ambari.metrics.core.timeline.TimelineMetricConfiguration;
 import org.apache.ambari.metrics.core.timeline.source.InternalSourceProvider;
 import org.apache.http.client.utils.URIBuilder;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+
 
 public class HttpSinkProvider implements ExternalSinkProvider {
   private static final Log LOG = LogFactory.getLog(HttpSinkProvider.class);
@@ -58,10 +59,10 @@ public class HttpSinkProvider implements ExternalSinkProvider {
 
   static {
     mapper = new ObjectMapper();
-    AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+    AnnotationIntrospector introspector = new JaxbAnnotationIntrospector(mapper.getTypeFactory());
     mapper.setAnnotationIntrospector(introspector);
-    mapper.getSerializationConfig()
-      .withSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+    mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    mapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
   }
 
   public HttpSinkProvider() {
